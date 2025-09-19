@@ -30,8 +30,9 @@
 OS_STK        TaskStk[N_TASKS][TASK_STK_SIZE];        /* Tasks stacks                                  */
 OS_STK        TaskStartStk[TASK_STK_SIZE];
 char          TaskData[N_TASKS];                      /* Parameters to pass to each task               */
-OS_EVENT*     TaskSem[N_TASKS];
-OS_EVENT*     RandomSem;
+OS_EVENT* TaskSem[N_TASKS];
+OS_EVENT* RandomSem;
+INT8U         final;
 
 /*
 *********************************************************************************************************
@@ -62,6 +63,7 @@ void  main(void)
     PC_VectSet(uCOS, OSCtxSw);                             /* Install uC/OS-II's context switch vector */
 
     RandomSem = OSSemCreate(1);                          /* Random number semaphore                  */
+    final = 64;
 
     OSTaskCreate(TaskStart, (void*)0, &TaskStartStk[TASK_STK_SIZE - 1], 0);
     OSStart();                                             /* Start multitasking                       */
@@ -214,6 +216,7 @@ static  void  TaskStartCreateTasks(void)
     for (i = 0; i < N_TASKS; i++) {                        /* Create N_TASKS identical tasks           */
         TaskData[i] = '0' + i;                             /* Each task will display its own letter    */
         OSTaskCreate(Task, (void*)&TaskData[i], &TaskStk[i][TASK_STK_SIZE - 1], i + 1);
+        //OSTimeDly(100); /* starvation 시에만 사용 */
     }
 }
 
@@ -223,53 +226,140 @@ static  void  TaskStartCreateTasks(void)
 *********************************************************************************************************
 */
 
-void  Task(void* pdata) // sleep 사용 코드
-{
-    INT8U p = *(char*)pdata - '0';
-    INT8U color;
-    INT8U  x;
-    INT8U  y;
+//void  Task (void *pdata) // 4가지 색 번갈아 출력 코드
+//{
+//    INT8U p = *(char*)pdata - '0';
+//    INT8U color;
+//    INT8U  x;
+//    INT8U  y;
+//
+//    for (;;) {
+//        // 출력 전
+//        if (p == 0) {
+//            color = DISP_FGND_RED + DISP_BGND_RED;
+//        }
+//        else if (p == 1) {
+//			OSTimeDlyHMSM(0, 0, 1, 0);
+//            color = DISP_FGND_BLUE + DISP_BGND_BLUE;
+//        }
+//        else if (p == 2) {
+//			OSTimeDlyHMSM(0, 0, 2, 0);
+//            color = DISP_FGND_BROWN + DISP_BGND_BROWN;
+//        }
+//        else if (p == 3) {
+//			OSTimeDlyHMSM(0, 0, 3, 0);
+//            color = DISP_FGND_GREEN + DISP_BGND_GREEN;
+//        }
+//
+//        // 출력
+//        for (y = 0; y < 16; y++) {
+//            for (x = 0; x < 80; x++) {
+//                PC_DispChar(x, y + 5, ' ', color);
+//            }
+//        }
+//
+//        // 출력 후
+//        if (p == 0) OSTimeDlyHMSM(0, 0, N_TASKS, 0);
+//		else if (p == 1) OSTimeDlyHMSM(0, 0, N_TASKS - 1, 0);
+//		else if (p == 2) OSTimeDlyHMSM(0, 0, N_TASKS - 2, 0);
+//		else if (p == 3) OSTimeDlyHMSM(0, 0, N_TASKS - 3, 0);
+//    }
+//
+//    //OSSemPend(RandomSem, 0, &err);           /* Acquire semaphore to perform random numbers        */
+//    //x = random(80);                          /* Find X position where task number will appear      */
+//    //y = random(16);                          /* Find Y position where task number will appear      */
+//    //OSSemPost(RandomSem);                    /* Release semaphore                                  */
+//    //                                         /* Display the task number on the screen              */
+//    //PC_DispChar(x, y + 5, *(char *)pdata, DISP_FGND_RED + DISP_BGND_RED);
+//    //OSTimeDly(1);                              /* Delay 1 clock tick                                 */
+//}
 
-    for (;;) {
-        // 출력 전
-        if (p == 0) {
-            color = DISP_FGND_RED + DISP_BGND_RED;
-        }
-        else if (p == 1) {
-            OSTimeDlyHMSM(0, 0, 1, 0);
-            color = DISP_FGND_BLUE + DISP_BGND_BLUE;
-        }
-        else if (p == 2) {
-            OSTimeDlyHMSM(0, 0, 2, 0);
-            color = DISP_FGND_BROWN + DISP_BGND_BROWN;
-        }
-        else if (p == 3) {
-            OSTimeDlyHMSM(0, 0, 3, 0);
-            color = DISP_FGND_GREEN + DISP_BGND_GREEN;
-        }
-
-        // 출력
-        for (y = 0; y < 16; y++) {
-            for (x = 0; x < 80; x++) {
-                PC_DispChar(x, y + 5, ' ', color);
-            }
-        }
-
-        // 출력 후
-        if (p == 0) OSTimeDlyHMSM(0, 0, N_TASKS, 0);
-        else if (p == 1) OSTimeDlyHMSM(0, 0, N_TASKS - 1, 0);
-        else if (p == 2) OSTimeDlyHMSM(0, 0, N_TASKS - 2, 0);
-        else if (p == 3) OSTimeDlyHMSM(0, 0, N_TASKS - 3, 0);
-    }
-
-    //OSSemPend(RandomSem, 0, &err);           /* Acquire semaphore to perform random numbers        */
-    //x = random(80);                          /* Find X position where task number will appear      */
-    //y = random(16);                          /* Find Y position where task number will appear      */
-    //OSSemPost(RandomSem);                    /* Release semaphore                                  */
-    //                                         /* Display the task number on the screen              */
-    //PC_DispChar(x, y + 5, *(char *)pdata, DISP_FGND_RED + DISP_BGND_RED);
-    //OSTimeDly(1);                              /* Delay 1 clock tick                                 */
-}
+//void  Task (void *pdata) // 빨간색만 출력
+//{
+//    INT8U p = *(char*)pdata - '0';
+//    INT8U color;
+//    INT8U  x;
+//    INT8U  y;
+//
+//    for (;;) {
+//        // 출력 전
+//        if (p == 0) color = DISP_FGND_RED + DISP_BGND_RED;
+//        else if (p == 1) color = DISP_FGND_BLUE + DISP_BGND_BLUE;
+//        else if (p == 2) color = DISP_FGND_BROWN + DISP_BGND_BROWN;
+//        else if (p == 3) color = DISP_FGND_GREEN + DISP_BGND_GREEN;
+//
+//        // 출력
+//        for (y = 0; y < 16; y++) {
+//            for (x = 0; x < 80; x++) {
+//                PC_DispChar(x, y + 5, ' ', color);
+//            }
+//        }
+//    }
+//}
+//
+//void  Task(void* pdata) // 빨-파만 출력
+//{
+//    INT8U p = *(char*)pdata - '0';
+//    INT8U color;
+//    INT8U  x;
+//    INT8U  y;
+//    INT32U count;
+//
+//    for (;;) {
+//        // 출력 전
+//        if (p == 0) color = DISP_FGND_RED + DISP_BGND_RED;
+//        else if (p == 1) color = DISP_FGND_BLUE + DISP_BGND_BLUE;
+//        else if (p == 2) color = DISP_FGND_BROWN + DISP_BGND_BROWN;
+//        else if (p == 3) color = DISP_FGND_GREEN + DISP_BGND_GREEN;
+//
+//        // 출력
+//        for (y = 0; y < 16; y++) {
+//            for (x = 0; x < 80; x++) {
+//                PC_DispChar(x, y + 5, ' ', color);
+//            }
+//        }
+//        if (p == 1) {
+//			for (count = 0; count < 500000; count++);
+//        }
+//
+//        // 출력 후
+//        if (p == 0) OSTimeDlyHMSM(0, 0, 1, 0);
+//    }
+//}
+//
+//void  Task(void* pdata) // 빨-파-갈만 출력
+//{
+//    INT8U p = *(char*)pdata - '0';
+//    INT8U color;
+//    INT8U  x;
+//    INT8U  y;
+//    INT32U count;
+//
+//    for (;;) {
+//        // 출력 전
+//        if (p == 0) color = DISP_FGND_RED + DISP_BGND_RED;
+//        else if (p == 1) {
+//            OSTimeDlyHMSM(0, 0, 1, 0);
+//            color = DISP_FGND_BLUE + DISP_BGND_BLUE;
+//        }
+//        else if (p == 2) color = DISP_FGND_BROWN + DISP_BGND_BROWN;
+//        else if (p == 3) color = DISP_FGND_GREEN + DISP_BGND_GREEN;
+//
+//        // 출력
+//        for (y = 0; y < 16; y++) {
+//            for (x = 0; x < 80; x++) {
+//                PC_DispChar(x, y + 5, ' ', color);
+//            }
+//        }
+//        if (p == 2) {
+//			for (count = 0; count < 500000; count++);
+//        }
+//
+//        // 출력 후
+//        if (p == 0) OSTimeDlyHMSM(0, 0, 2, 0);
+//		else if (p == 1) OSTimeDlyHMSM(0, 0, 1, 0);
+//    }
+//}
 
 //void  Task(void* pdata) // 세마포어 사용 코드
 //{
