@@ -226,7 +226,7 @@ static  void  TaskStartCreateTasks(void)
 *********************************************************************************************************
 */
 
-//void  Task (void *pdata) // 4가지 색 번갈아 출력 코드
+//void  Task (void *pdata) // 4가지 색 번갈아 출력하는 코드
 //{
 //    INT8U p = *(char*)pdata - '0';
 //    INT8U color;
@@ -319,7 +319,7 @@ static  void  TaskStartCreateTasks(void)
 //            }
 //        }
 //        if (p == 1) {
-//			for (count = 0; count < 500000; count++);
+//			for (count = 0; count < 1000000; count++);
 //        }
 //
 //        // 출력 후
@@ -352,7 +352,7 @@ static  void  TaskStartCreateTasks(void)
 //            }
 //        }
 //        if (p == 2) {
-//			for (count = 0; count < 500000; count++);
+//			for (count = 0; count < 1000000; count++);
 //        }
 //
 //        // 출력 후
