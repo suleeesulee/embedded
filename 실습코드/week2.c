@@ -389,3 +389,107 @@ static  void  TaskStartCreateTasks(void)
 //        OSSemPost(TaskSem[(p + 1) % N_TASKS]);
 //    }
 //}
+
+// 3주차 과제
+// 전역 변수로 final 선언하고 main에서 64로 초기화 해야 함
+// task 갯수는 1개
+//void  Task(void* pdata)
+//{
+//    INT8U randomNum[4];
+//    INT8U i;
+//    INT8U x;
+//    INT8U y;
+//    INT8U highestPrio;
+//    INT8U osRdyGrp;
+//    INT8U osRdyTbl[8];
+//    INT8U a = 0;
+//    INT8U b = 5;
+//    INT8U colorType = 0;
+//
+//    pdata = pdata;
+//
+//    for (;;) {
+//        // initialize Rdy table & Rdy group
+//        osRdyGrp = 0;
+//        for (i = 0; i < 8; i++) {
+//            osRdyTbl[i] = 0;
+//        }
+//
+//        // get random numbers and set in Rdy table & Rdy group
+//        for (i = 0; i < 4; i++) {
+//            randomNum[i] = random(63);
+//            osRdyGrp |= OSMapTbl[randomNum[i] >> 3];
+//            osRdyTbl[randomNum[i] >> 3] |= OSMapTbl[randomNum[i] & 0x07];
+//        }
+//
+//        // find highest priority
+//        y = OSUnMapTbl[osRdyGrp];
+//        x = OSUnMapTbl[osRdyTbl[y]];
+//        highestPrio = (y << 3) + x;
+//
+//        // if highest priority is less than final, update final and display
+//        if (highestPrio < final) {
+//            final = highestPrio;
+//
+//            if (colorType == 0) {
+//                PC_DispChar(a + 12, b, '0' + (highestPrio / 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_RED);
+//                PC_DispChar(a + 13, b, '0' + (highestPrio % 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_RED);
+//                colorType = 1;
+//            }
+//            else if (colorType == 1) {
+//                PC_DispChar(a + 12, b, '0' + (highestPrio / 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_BLUE);
+//                PC_DispChar(a + 13, b, '0' + (highestPrio % 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_BLUE);
+//                colorType = 2;
+//            }
+//            else if (colorType == 2) {
+//                PC_DispChar(a + 12, b, '0' + (highestPrio / 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_GREEN);
+//                PC_DispChar(a + 13, b, '0' + (highestPrio % 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_GREEN);
+//                colorType = 3;
+//            }
+//            else if (colorType == 3) {
+//                PC_DispChar(a + 12, b, '0' + (highestPrio / 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_BROWN);
+//                PC_DispChar(a + 13, b, '0' + (highestPrio % 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_BROWN);
+//                colorType = 0;
+//            }
+//        }
+//        if (final == 0) {
+//            final = 64;
+//        }
+//
+//        // display random numbers
+//        PC_DispChar(a, b, '0' + (randomNum[0] / 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//        PC_DispChar(a + 1, b, '0' + (randomNum[0] % 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//
+//        PC_DispChar(a + 3, b, '0' + (randomNum[1] / 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//        PC_DispChar(a + 4, b, '0' + (randomNum[1] % 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//
+//        PC_DispChar(a + 6, b, '0' + (randomNum[2] / 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//        PC_DispChar(a + 7, b, '0' + (randomNum[2] % 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//
+//        PC_DispChar(a + 9, b, '0' + (randomNum[3] / 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//        PC_DispChar(a + 10, b, '0' + (randomNum[3] % 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//
+//        b++;
+//
+//        // if screen is full, clear and start over
+//        if (b > 20 && a >= 60) {
+//            OSTimeDlyHMSM(0, 0, 3, 0);
+//            a = 0;
+//            b = 5;
+//
+//            for (y = 0; y < 16; y++) {
+//                for (x = 0; x < 80; x++) {
+//                    PC_DispChar(x, y + 5, ' ', DISP_BGND_LIGHT_GRAY);
+//                }
+//            }
+//            continue;
+//        }
+//        // if row is full, next column
+//        if (b > 20) {
+//            b = 5;
+//            a += 15;
+//        }
+//
+//        OSTimeDly(10);
+//    }
+//}
