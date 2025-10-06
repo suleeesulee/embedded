@@ -32,7 +32,10 @@ OS_STK        TaskStartStk[TASK_STK_SIZE];
 char          TaskData[N_TASKS];                      /* Parameters to pass to each task               */
 OS_EVENT* TaskSem[N_TASKS];
 OS_EVENT* RandomSem;
-INT8U         final;
+INT8U         final; // week2
+
+OS_EVENT* mbox_to_random[4]; // weekd3
+OS_EVENT* mbox_to_decision[4];
 
 /*
 *********************************************************************************************************
@@ -95,9 +98,16 @@ void  TaskStart(void* pdata)
 
     OSStatInit();                                          /* Initialize uC/OS-II's statistics         */
 
-    for (i = 0; i < N_TASKS; i++) {
+    // week1
+    /*for (i = 0; i < N_TASKS; i++) {
         TaskSem[i] = OSSemCreate(i == 0 ? 1 : 0);
-    }
+    }*/
+
+    // week3
+    /*for (i = 0; i < N_TASKS - 1; i++) {
+        mbox_to_random[i] = OSMboxCreate(0);
+        mbox_to_decision[i] = OSMboxCreate(0);
+    }*/
 
     TaskStartCreateTasks();                                /* Create all the application tasks         */
 
@@ -498,5 +508,103 @@ static  void  TaskStartCreateTasks(void)
 //
 //        // 10. wait a while before next loop
 //        OSTimeDly(10);
+//    }
+//}
+
+// weekd 4
+//void Task(void* pdata) {
+//    INT8U err;
+//    INT8U i, j;
+//
+//    INT8U push_number;
+//    int get_number[4];
+//
+//    INT8U min;
+//    INT8U min_task;
+//    int task_number = (int)(*(char*)pdata - 48);
+//
+//    char push_letter;
+//    char get_letter;
+//
+//    int fgnd_color, bgnd_color;
+//
+//    char s[10];
+//
+//    // If pdata is 0-3, it's a random task, if it's 4, decision task.
+//    if (*(char*)pdata == '4') { // decision task
+//        for (;;) {
+//            for (i = 0; i < N_TASKS - 1; i++) {
+//                // Wait until the random number arrives. Store the value in the get_number array.
+//                get_number[i] = *(int*)OSMboxPend(mbox_to_decision[i], 0, &err);
+//            }
+//
+//            min = get_number[0];
+//            min_task = 0;
+//            for (i = 1; i < N_TASKS - 1; i++) {
+//                // Find the smallest number among the 4 random numbers sent by the random tasks.
+//                if (get_number[i] < min) {
+//                    min = get_number[i];
+//                    min_task = i;
+//                }
+//            }
+//            for (i = 0; i < N_TASKS - 1; i++) {
+//                if (i == min_task) {
+//                    push_letter = 'W';
+//                }
+//                else {
+//                    push_letter = 'L';
+//                }
+//
+//                // Send W or L to the random task.
+//                OSMboxPost(mbox_to_random[i], (void*)&push_letter);
+//            }
+//            OSTimeDlyHMSM(0, 0, 5, 0);
+//        }
+//    }
+//    else { // random task
+//        for (;;) {
+//            push_number = random(64);
+//            sprintf(s, "%2d", push_number);
+//
+//            PC_DispStr(0 + 18 * task_number, 4, "task", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//            PC_DispChar(4 + 18 * task_number, 4, *(char*)pdata, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//            PC_DispStr(6 + 18 * task_number, 4, s, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//
+//            // Post to the decision task and wait with pend.
+//            OSMboxPost(mbox_to_decision[task_number], (void*)&push_number);
+//            get_letter = *(char*)OSMboxPend(mbox_to_random[task_number], 0, &err);
+//
+//            // Save background & foreground color based on task number
+//            if (*(char*)pdata == '0') {
+//                bgnd_color = DISP_BGND_RED;
+//                fgnd_color = DISP_FGND_RED;
+//            }
+//            else if (*(char*)pdata == '1') {
+//                bgnd_color = DISP_BGND_BROWN;
+//                fgnd_color = DISP_FGND_BROWN;
+//            }
+//            else if (*(char*)pdata == '2') {
+//                bgnd_color = DISP_BGND_BLUE;
+//                fgnd_color = DISP_FGND_BLUE;
+//            }
+//            else if (*(char*)pdata == '3') {
+//                bgnd_color = DISP_BGND_GREEN;
+//                fgnd_color = DISP_FGND_GREEN;
+//            }
+//
+//            PC_DispStr(8 + 18 * task_number, 4, "[", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//            PC_DispStr(10 + 18 * task_number, 4, "]", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//            PC_DispChar(9 + 18 * task_number, 4, get_letter, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//
+//            // If W is received, fill the screen with the task's color.
+//            if (get_letter == 'W') {
+//                for (j = 5; j < 20; j++) {
+//                    for (i = 0; i < 80; i++) {
+//                        PC_DispChar(i, j, ' ', fgnd_color + bgnd_color);
+//                    }
+//                }
+//            }
+//            OSTimeDlyHMSM(0, 0, 5, 0);
+//        }
 //    }
 //}
