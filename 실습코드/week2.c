@@ -34,8 +34,14 @@ OS_EVENT* TaskSem[N_TASKS];
 OS_EVENT* RandomSem;
 INT8U         final; // week2
 
-OS_EVENT* mbox_to_random[4]; // weekd3
+OS_EVENT* mbox_to_random[4]; // weekd4
 OS_EVENT* mbox_to_decision[4];
+
+// week5
+OS_FLAG_GRP* s_grp;
+OS_FLAG_GRP* r_grp; // flag group for send & receive
+int			  send_array[4]; // array to store sent random numbers
+char          receive_array[4]; // array to store received letters
 
 /*
 *********************************************************************************************************
@@ -103,10 +109,19 @@ void  TaskStart(void* pdata)
         TaskSem[i] = OSSemCreate(i == 0 ? 1 : 0);
     }*/
 
-    // week3
+    // week4
     /*for (i = 0; i < N_TASKS - 1; i++) {
         mbox_to_random[i] = OSMboxCreate(0);
         mbox_to_decision[i] = OSMboxCreate(0);
+    }*/
+
+    // week5
+    /*s_grp = OSFlagCreate(0x00, &err);
+    r_grp = OSFlagCreate(0x00, &err);
+
+    for (i = 0; i < N_TASKS - 2; i++) {
+        send_array[i] = 0;
+        receive_array[i] = 0;
     }*/
 
     TaskStartCreateTasks();                                /* Create all the application tasks         */
@@ -597,6 +612,97 @@ static  void  TaskStartCreateTasks(void)
 //            PC_DispChar(9 + 18 * task_number, 4, get_letter, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
 //
 //            // If W is received, fill the screen with the task's color.
+//            if (get_letter == 'W') {
+//                for (j = 5; j < 20; j++) {
+//                    for (i = 0; i < 80; i++) {
+//                        PC_DispChar(i, j, ' ', fgnd_color + bgnd_color);
+//                    }
+//                }
+//            }
+//            OSTimeDlyHMSM(0, 0, 5, 0);
+//        }
+//    }
+//}
+
+// week 5
+//void Task(void* pdata) {
+//    INT8U err; // error variable
+//
+//    INT8U i, j;
+//
+//    INT8U min;		// Variable to store the minimum value
+//    INT8U min_task;	// Variable to store which task has the minimum value
+//    int task_number = (int)(*(char*)pdata - 48); // index of each task (Since pdata is of char type, subtracting 48 (ASCII '0') converts it to an int)
+//
+//    char get_letter; // Variable to store 'W' or 'L' 
+//
+//    int fgnd_color, bgnd_color; // Variables to store foreground and background colors
+//
+//    char s[10]; // String variable for displaying numbers
+//
+//    // If pdata is 0-3, it's a random task, if it's 4, decision task.
+//    if (*(char*)pdata == '4') { // decision task
+//        for (;;) {
+//            min = send_array[0];
+//            min_task = 0;
+//            for (i = 1; i < N_TASKS - 1; i++) {
+//                // Find the smallest number among the 4 random numbers sent by the random tasks.
+//                if (send_array[i] < min) {
+//                    min = send_array[i];
+//                    min_task = i;
+//                }
+//            }
+//            for (i = 0; i < N_TASKS - 1; i++) {
+//                OSSemPend(RandomSem, 0, &err);
+//                if (i == min_task) {
+//                    receive_array[i] = 'W';
+//                }
+//                else {
+//                    receive_array[i] = 'L';
+//                }
+//                OSSemPost(RandomSem);
+//            }
+//            // Notify all random tasks that the decision has been made.
+//            OSFlagPost(r_grp, 0x0F, OS_FLAG_SET, &err);
+//            OSTimeDlyHMSM(0, 0, 5, 0);
+//        }
+//    }
+//    else { // random task
+//        for (;;) {
+//            OSSemPend(RandomSem, 0, &err);
+//            send_array[task_number] = random(64);
+//            OSSemPost(RandomSem);
+//
+//            sprintf(s, "%2d", send_array[task_number]);
+//
+//            PC_DispStr(0 + 18 * task_number, 4, "task", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//            PC_DispChar(4 + 18 * task_number, 4, *(char*)pdata, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//            PC_DispStr(6 + 18 * task_number, 4, s, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//
+//            // Post to the decision task and wait with pend.
+//            OSFlagPend(r_grp, 0x01 << task_number, OS_FLAG_WAIT_SET_ALL + OS_FLAG_CONSUME, 0, &err);
+//            get_letter = receive_array[task_number];
+//
+//            if (*(char*)pdata == '0') {
+//                bgnd_color = DISP_BGND_RED;
+//                fgnd_color = DISP_FGND_RED;
+//            }
+//            else if (*(char*)pdata == '1') {
+//                bgnd_color = DISP_BGND_BROWN;
+//                fgnd_color = DISP_FGND_BROWN;
+//            }
+//            else if (*(char*)pdata == '2') {
+//                bgnd_color = DISP_BGND_BLUE;
+//                fgnd_color = DISP_FGND_BLUE;
+//            }
+//            else if (*(char*)pdata == '3') {
+//                bgnd_color = DISP_BGND_GREEN;
+//                fgnd_color = DISP_FGND_GREEN;
+//            }
+//            PC_DispStr(8 + 18 * task_number, 4, "[", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//            PC_DispStr(10 + 18 * task_number, 4, "]", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//            PC_DispChar(9 + 18 * task_number, 4, get_letter, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+//
 //            if (get_letter == 'W') {
 //                for (j = 5; j < 20; j++) {
 //                    for (i = 0; i < 80; i++) {
