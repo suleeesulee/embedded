@@ -19,7 +19,7 @@
 */
 
 #define  TASK_STK_SIZE                 512       /* Size of each task's stacks (# of WORDs)            */
-#define  N_TASKS                        4        /* Number of identical tasks                          */
+#define  N_TASKS                        1        /* Number of identical tasks                          */
 
 /*
 *********************************************************************************************************
@@ -32,6 +32,7 @@ OS_STK        TaskStartStk[TASK_STK_SIZE];
 char          TaskData[N_TASKS];                      /* Parameters to pass to each task               */
 OS_EVENT* TaskSem[N_TASKS];
 OS_EVENT* RandomSem;
+INT8U         final;
 
 /*
 *********************************************************************************************************
@@ -62,6 +63,7 @@ void  main(void)
     PC_VectSet(uCOS, OSCtxSw);                             /* Install uC/OS-II's context switch vector */
 
     RandomSem = OSSemCreate(1);                          /* Random number semaphore                  */
+    final = 64;
 
     OSTaskCreate(TaskStart, (void*)0, &TaskStartStk[TASK_STK_SIZE - 1], 0);
     OSStart();                                             /* Start multitasking                       */
@@ -92,11 +94,6 @@ void  TaskStart(void* pdata)
     OS_EXIT_CRITICAL();
 
     OSStatInit();                                          /* Initialize uC/OS-II's statistics         */
-
-    // week1
-    /*for (i = 0; i < N_TASKS; i++) {
-        TaskSem[i] = OSSemCreate(i == 0 ? 1 : 0);
-    }*/
 
     TaskStartCreateTasks();                                /* Create all the application tasks         */
 
@@ -225,166 +222,111 @@ static  void  TaskStartCreateTasks(void)
 *********************************************************************************************************
 */
 
-//void  Task (void *pdata) // 4가지 색 번갈아 출력하는 코드
-//{
-//    INT8U p = *(char*)pdata - '0';
-//    INT8U color;
-//    INT8U  x;
-//    INT8U  y;
-//
-//    for (;;) {
-//        // 출력 전
-//        if (p == 0) {
-//            color = DISP_FGND_RED + DISP_BGND_RED;
-//        }
-//        else if (p == 1) {
-//			OSTimeDlyHMSM(0, 0, 1, 0);
-//            color = DISP_FGND_BLUE + DISP_BGND_BLUE;
-//        }
-//        else if (p == 2) {
-//			OSTimeDlyHMSM(0, 0, 2, 0);
-//            color = DISP_FGND_BROWN + DISP_BGND_BROWN;
-//        }
-//        else if (p == 3) {
-//			OSTimeDlyHMSM(0, 0, 3, 0);
-//            color = DISP_FGND_GREEN + DISP_BGND_GREEN;
-//        }
-//
-//        // 출력
-//        for (y = 0; y < 16; y++) {
-//            for (x = 0; x < 80; x++) {
-//                PC_DispChar(x, y + 5, ' ', color);
-//            }
-//        }
-//
-//        // 출력 후
-//        if (p == 0) OSTimeDlyHMSM(0, 0, N_TASKS, 0);
-//		else if (p == 1) OSTimeDlyHMSM(0, 0, N_TASKS - 1, 0);
-//		else if (p == 2) OSTimeDlyHMSM(0, 0, N_TASKS - 2, 0);
-//		else if (p == 3) OSTimeDlyHMSM(0, 0, N_TASKS - 3, 0);
-//    }
-//
-//    //OSSemPend(RandomSem, 0, &err);           /* Acquire semaphore to perform random numbers        */
-//    //x = random(80);                          /* Find X position where task number will appear      */
-//    //y = random(16);                          /* Find Y position where task number will appear      */
-//    //OSSemPost(RandomSem);                    /* Release semaphore                                  */
-//    //                                         /* Display the task number on the screen              */
-//    //PC_DispChar(x, y + 5, *(char *)pdata, DISP_FGND_RED + DISP_BGND_RED);
-//    //OSTimeDly(1);                              /* Delay 1 clock tick                                 */
-//}
+// 3주차 과제
+void  Task(void* pdata)
+{
+    INT8U i; // loop index
 
-//void  Task (void *pdata) // 빨간색만 출력
-//{
-//    INT8U p = *(char*)pdata - '0';
-//    INT8U color;
-//    INT8U  x;
-//    INT8U  y;
-//
-//    for (;;) {
-//        // 출력 전
-//        if (p == 0) color = DISP_FGND_RED + DISP_BGND_RED;
-//        else if (p == 1) color = DISP_FGND_BLUE + DISP_BGND_BLUE;
-//        else if (p == 2) color = DISP_FGND_BROWN + DISP_BGND_BROWN;
-//        else if (p == 3) color = DISP_FGND_GREEN + DISP_BGND_GREEN;
-//
-//        // 출력
-//        for (y = 0; y < 16; y++) {
-//            for (x = 0; x < 80; x++) {
-//                PC_DispChar(x, y + 5, ' ', color);
-//            }
-//        }
-//    }
-//}
-//
-//void  Task(void* pdata) // 빨-파만 출력
-//{
-//    INT8U p = *(char*)pdata - '0';
-//    INT8U color;
-//    INT8U  x;
-//    INT8U  y;
-//    INT32U count;
-//
-//    for (;;) {
-//        // 출력 전
-//        if (p == 0) color = DISP_FGND_RED + DISP_BGND_RED;
-//        else if (p == 1) color = DISP_FGND_BLUE + DISP_BGND_BLUE;
-//        else if (p == 2) color = DISP_FGND_BROWN + DISP_BGND_BROWN;
-//        else if (p == 3) color = DISP_FGND_GREEN + DISP_BGND_GREEN;
-//
-//        // 출력
-//        for (y = 0; y < 16; y++) {
-//            for (x = 0; x < 80; x++) {
-//                PC_DispChar(x, y + 5, ' ', color);
-//            }
-//        }
-//        if (p == 1) {
-//			for (count = 0; count < 1000000; count++);
-//        }
-//
-//        // 출력 후
-//        if (p == 0) OSTimeDlyHMSM(0, 0, 1, 0);
-//    }
-//}
-//
-//void  Task(void* pdata) // 빨-파-갈만 출력
-//{
-//    INT8U p = *(char*)pdata - '0';
-//    INT8U color;
-//    INT8U  x;
-//    INT8U  y;
-//    INT32U count;
-//
-//    for (;;) {
-//        // 출력 전
-//        if (p == 0) color = DISP_FGND_RED + DISP_BGND_RED;
-//        else if (p == 1) {
-//            OSTimeDlyHMSM(0, 0, 1, 0);
-//            color = DISP_FGND_BLUE + DISP_BGND_BLUE;
-//        }
-//        else if (p == 2) color = DISP_FGND_BROWN + DISP_BGND_BROWN;
-//        else if (p == 3) color = DISP_FGND_GREEN + DISP_BGND_GREEN;
-//
-//        // 출력
-//        for (y = 0; y < 16; y++) {
-//            for (x = 0; x < 80; x++) {
-//                PC_DispChar(x, y + 5, ' ', color);
-//            }
-//        }
-//        if (p == 2) {
-//			for (count = 0; count < 1000000; count++);
-//        }
-//
-//        // 출력 후
-//        if (p == 0) OSTimeDlyHMSM(0, 0, 2, 0);
-//		else if (p == 1) OSTimeDlyHMSM(0, 0, 1, 0);
-//    }
-//}
+    INT8U x = 0; // column
+    INT8U y = 5; // row
 
-//void  Task(void* pdata) // 세마포어 사용 코드
-//{
-//    INT8U p = *(char*)pdata - '0';
-//    INT8U color;
-//    INT8U  x;
-//    INT8U  y;
-//    INT8U  err;
-//
-//    for (;;) {
-//		// 출력 전
-//        if (p == 0) color = DISP_FGND_RED + DISP_BGND_RED;
-//        else if (p == 1) color = DISP_FGND_BLUE + DISP_BGND_BLUE;
-//        else if (p == 2) color = DISP_FGND_BROWN + DISP_BGND_BROWN;
-//        else if (p == 3) color = DISP_FGND_GREEN + DISP_BGND_GREEN;
-//
-//        OSSemPend(TaskSem[p], 0, &err);
-//        // 출력
-//        for (y = 0; y < 16; y++) {
-//            for (x = 0; x < 80; x++) {
-//                PC_DispChar(x, y + 5, ' ', color);
-//            }
-//        }
-//        
-//		// 출력 후
-//        OSTimeDlyHMSM(0, 0, 1, 0);
-//        OSSemPost(TaskSem[(p + 1) % N_TASKS]);
-//    }
-//}
+    INT8U a; // temp variable for finding highest priority
+    INT8U b; // temp variable for finding highest priority
+    INT8U highestPrio; // highest priority
+
+    INT8U osRdyGrp;
+    INT8U osRdyTbl[8];
+
+    INT8U randomNum[4];
+    INT8U colorType = 0; // 0: red, 1: blue, 2: green, 3: brown
+
+    pdata = pdata;
+
+    for (;;) {
+        // 1. initialize Rdy table & Rdy group
+        osRdyGrp = 0;
+        for (i = 0; i < 8; i++) {
+            osRdyTbl[i] = 0;
+        }
+
+        // 2 ~ 3. get random numbers and set in Rdy table & Rdy group
+        for (i = 0; i < 4; i++) {
+            randomNum[i] = random(63);
+            osRdyGrp |= OSMapTbl[randomNum[i] >> 3];
+            osRdyTbl[randomNum[i] >> 3] |= OSMapTbl[randomNum[i] & 0x07];
+        }
+
+        // 4. find highest priority
+        b = OSUnMapTbl[osRdyGrp];
+        a = OSUnMapTbl[osRdyTbl[b]];
+        highestPrio = (b << 3) + a;
+
+        // 5. if highest priority is less than final, update final and display
+        if (highestPrio < final) {
+            final = highestPrio;
+
+            if (colorType == 0) {
+                PC_DispChar(x + 12, y, '0' + (highestPrio / 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_RED);
+                PC_DispChar(x + 13, y, '0' + (highestPrio % 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_RED);
+                colorType = 1;
+            }
+            else if (colorType == 1) {
+                PC_DispChar(x + 12, y, '0' + (highestPrio / 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_BLUE);
+                PC_DispChar(x + 13, y, '0' + (highestPrio % 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_BLUE);
+                colorType = 2;
+            }
+            else if (colorType == 2) {
+                PC_DispChar(x + 12, y, '0' + (highestPrio / 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_GREEN);
+                PC_DispChar(x + 13, y, '0' + (highestPrio % 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_GREEN);
+                colorType = 3;
+            }
+            else if (colorType == 3) {
+                PC_DispChar(x + 12, y, '0' + (highestPrio / 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_BROWN);
+                PC_DispChar(x + 13, y, '0' + (highestPrio % 10), DISP_FGND_LIGHT_GRAY + DISP_BGND_BROWN);
+                colorType = 0;
+            }
+        }
+        // 6. initialize final if it is 0
+        if (final == 0) {
+            final = 64;
+        }
+
+        // 7. display random numbers
+        PC_DispChar(x, y, '0' + (randomNum[0] / 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+        PC_DispChar(x + 1, y, '0' + (randomNum[0] % 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+
+        PC_DispChar(x + 3, y, '0' + (randomNum[1] / 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+        PC_DispChar(x + 4, y, '0' + (randomNum[1] % 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+
+        PC_DispChar(x + 6, y, '0' + (randomNum[2] / 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+        PC_DispChar(x + 7, y, '0' + (randomNum[2] % 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+
+        PC_DispChar(x + 9, y, '0' + (randomNum[3] / 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+        PC_DispChar(x + 10, y, '0' + (randomNum[3] % 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+
+        y++;
+
+        // 8. if screen is full, clear and start over
+        if (y > 20 && x >= 60) {
+            OSTimeDlyHMSM(0, 0, 3, 0);
+
+            for (y = 0; y < 16; y++) {
+                for (x = 0; x < 80; x++) {
+                    PC_DispChar(x, y + 5, ' ', DISP_BGND_LIGHT_GRAY);
+                }
+            }
+
+            x = 0;
+            y = 5;
+            continue;
+        }
+        // 9. if row is full, next column
+        if (y > 20) {
+            y = 5;
+            x += 15;
+        }
+
+        // 10. wait a while before next loop
+        OSTimeDly(10);
+    }
+}
