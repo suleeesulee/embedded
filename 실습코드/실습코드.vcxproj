@@ -127,11 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="week10.c" />
     <ClCompile Include="week2.c" />
     <ClCompile Include="week3.c" />
     <ClCompile Include="week4.c" />
     <ClCompile Include="week5.c" />
     <ClCompile Include="week7.c" />
+    <ClCompile Include="week9.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
